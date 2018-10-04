@@ -1,0 +1,9 @@
+{
+  "firebase": "vencki-iot-sample",
+  "public": ".",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}
