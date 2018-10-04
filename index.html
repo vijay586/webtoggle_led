@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Remote Control LED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+	
+	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/firebase/firebase.js"></script>
+	<script src="bower_components/angularfire/dist/angularfire.min.js"></script>
+
+</head>
+<body ng-app="iotSample" class="container">
+
+	<div class="row"><strong class="col-md-6">Toggle LED light on or off</strong>
+	<div ng-controller="ledController" class="col-md-6">
+		<button class="btn btn-lg active" ng-class="buttonClass" ng-click="toggleLedLight()"> {{buttonLabel}} </button>		
+
+		<div class="row">
+			<div ng-class="proximityClass">{{proximityMessage}}</div>
+		</div>
+
+	</div>
+	</div>
+
+
+	<script type="text/javascript">
+		angular.module('iotSample', ['firebase'])
+		.controller('ledController', function($scope, $firebaseObject){
+			$scope.switchLedOn = $firebaseObject(new Firebase('https://vencki-iot-sample.firebaseio.com/LED'));
+			var ref = new Firebase('https://vencki-iot-sample.firebaseio.com/proximityWarning/isClose');
+			$scope.proximity = $firebaseObject(ref);
+			function setSwitchLabel(){
+				$scope.buttonLabel = $scope.switchLedOn.$value ? 'Switch It Off' : 'Switch It On';
+				$scope.buttonClass = $scope.switchLedOn.$value ? 'btn-primary': '';
+			}
+			function setProximityLabel(value){
+				$scope.proximityMessage = value ? "Someone's there" : "Safe";
+				$scope.proximityClass = value ? "text-danger" : "text-primary";
+			}
+			ref.on('value', function(snapshot){
+				$scope.$apply(function(){
+					setProximityLabel(snapshot.val());
+				});
+			});
+			setSwitchLabel();
+			$scope.toggleLedLight = function(){
+				$scope.switchLedOn.$value = !$scope.switchLedOn.$value;
+				setSwitchLabel();
+				setProximityLabel();
+			}
+			//$scope.proximity.$bindTo($scope, 'proximity');
+			$scope.switchLedOn.$bindTo($scope, 'switchLedOn');
+		});
+	</script>
+
+</body>
+</html>
